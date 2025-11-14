@@ -1,12 +1,12 @@
-﻿INSERT INTO PHONGKHAM (MaPhong, TenPhong, ChuyenKhoa, TinhTrang)
+﻿INSERT INTO LichKham (MaLichKham, MaBenhNhan, MaBacSi, MaPhong, NgayGioKham, TrangThai, NgayCapNhat)
 VALUES
-(1, N'Phong A', N'Khoa Nhĩ', N'Đã có bệnh nhân'),
-(2, N'Phong B', N'Nhi khoa', N'Đã có bệnh nhân'),
-(3, N'Phong C', N'Sản khoa', N'Còn trống'),
-(4, N'Phong D', N'Ngoại khoa', N'Còn trống'),
-(5, N'Phong E', N'Tai Mũi Họng', N'Đã có bệnh nhân'),
-(6, N'Phong F', N'Răng Hàm Mặt', N'Còn trống'),
-(7, N'Phong G', N'Phẫu thuật', N'Đã có bệnh nhân'),
-(8, N'Phong H', N'Khoa tim mạch', N'Còn trống'),
-(9, N'Phong I', N'Ngoại thần kinh', N'Đã có bệnh nhân'),
-(10, N'Phong J', N'Chuyên khoa tim mạch', N'Còn trống');
+(1, 1, 1, 1, '2025-11-10 08:30:00.000', 'Đã khám', '2025-11-10 08:30:00.000'),
+(2, 2, 2, 2, '2025-11-10 09:00:00.000', 'Đã khám', '2025-11-10 09:00:00.000'),
+(3, 3, 3, 3, '2025-11-10 09:30:00.000', 'Đã khám', '2025-11-10 09:30:00.000'),
+(4, 4, 4, 4, '2025-11-10 10:00:00.000', 'Đã khám', '2025-11-10 10:00:00.000'),
+(5, 5, 5, 5, '2025-11-10 10:30:00.000', 'Chưa khám', '2025-11-10 10:30:00.000'),
+(6, 6, 6, 6, '2025-11-10 11:00:00.000', 'Chưa khám', '2025-11-10 11:00:00.000'),
+(7, 7, 7, 7, '2025-11-10 11:30:00.000', 'Chưa khám', '2025-11-10 11:30:00.000'),
+(8, 8, 8, 8, '2025-11-10 12:00:00.000', 'Chưa khám', '2025-11-10 12:00:00.000'),
+(9, 9, 9, 9, '2025-11-15 12:35:00.000', 'Chưa khám', '2025-11-15 12:35:00.000'),
+(10, 10, 10, 10, '2025-11-10 13:00:00.000', 'Đã hủy', '2025-11-10 13:00:00.000');
