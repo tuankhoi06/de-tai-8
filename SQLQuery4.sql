@@ -1,0 +1,20 @@
+﻿INSERT INTO PHONGKHAM (MaPhong, TenPhong, ChuyenKhoa, TinhTrang)
+VALUES
+(1, 'Phong A', 'Khoa Nhĩ', 'Còn trống'),
+(2, 'Phong B', 'Nhĩ khoa', 'Còn trống'),
+(3, 'Phong C', 'Sản khoa', 'Còn trống'),
+(4, 'Phong D', 'Ngoại khoa', 'Còn trống'),
+(5, 'Phong E', 'Tai Mũi Họng', 'Còn trống'),
+(6, 'Phong F', 'Răng Hàm Mặt', 'Còn trống'),
+(7, 'Phong G', 'Phẫu thuật', 'Còn trống'),
+(8, 'Phong H', 'Khoa tim mạch', 'Còn trống'),
+(9, 'Phong I', 'Ngoại thần kinh', 'Còn trống'),
+(10, 'Phong J', 'Chuyên khoa tim mạch', 'Còn trống'),
+(11, 'Phong K', 'Nội tổng quát 1', 'Còn trống'),
+(12, 'Phong L', 'Nội tổng quát 2', 'Còn trống'),
+(13, 'Phong M', 'Khoa Nhĩ', 'Còn trống'),
+(14, 'Phong N', 'Nội tổng quát 1', 'Còn trống'),
+(15, 'Phong O', 'Tai Mũi Họng 2', 'Còn trống'),
+(16, 'Phong P', 'Khoa tim mạch', 'Còn trống'),
+(17, 'Phong Q', 'Ngoại thần kinh', 'Còn trống'),
+(18, 'Phong R', 'Răng Hàm Mặt', 'Còn trống');
