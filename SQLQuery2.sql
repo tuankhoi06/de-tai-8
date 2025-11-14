@@ -10,6 +10,3 @@ VALUES
 (8, N'Nguyễn Thị Liên', '1980-01-15', 'F', N'Hải Phòng', '0931234567', N'Đang điều trị'),
 (9, N'Nguyễn Văn Quang', '1984-08-22', 'M', N'TP HCM', '0986234567', N'Đã khám'),
 (10, N'Lê Hữu Yên', '1992-06-29', 'F', N'Hà Nội', '0906123456', N'Chưa khám');
-
-
-
