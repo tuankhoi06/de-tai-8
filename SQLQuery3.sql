@@ -1,4 +1,4 @@
-﻿INSERT INTO BacSi (MaBacSi, HoTen, NgaySinh, GioiTinh, DiaChi, ChuyenKhoa)
+﻿INSERT INTO BACSI (MaBacSi, HoTen, NgaySinh, GioiTinh, DiaChi, ChuyenKhoa)
 VALUES
 (1, N'Nguyễn Văn A', '1980-02-15', 'M', N'Ha Noi', N'Khoa Nhĩ'),
 (2, N'Nguyễn Thị B', '1986-07-22', 'F', N'TP HCM', N'Nhĩ khoa'),
@@ -18,3 +18,4 @@ VALUES
 (16, N'Vũ Thị Lan Hương', '1981-01-25', 'F', N'Bắc Ninh', N'Tai Mũi Họng'),
 (17, N'Hoàng Anh Dũng', '1983-08-14', 'M', N'Quảng Ninh', N'Răng Hàm Mặt'),
 (18, N'Ngô Thị Mai Anh', '1988-12-02', 'F', N'TP HCM', N'Đa Khoa');
+
