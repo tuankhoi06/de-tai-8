@@ -56,7 +56,7 @@ class HospitalApp:
         self.container.pack(fill="both", expand=True, padx=10, pady=10)
 
         self.frames = {}
-        for F in (LoginForm, Dashboard, BenhNhanForm, BacSiForm, PhongKhamForm,
+        for F in ( Dashboard, BenhNhanForm, BacSiForm, PhongKhamForm,
                   LichKhamForm, TraCuuForm, BaoCaoForm):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
@@ -86,34 +86,13 @@ class HospitalApp:
         menu.add_separator()
         menu.add_command(label="Thoát", command=self.root.quit)
 
-# ==================== ĐĂNG NHẬP (CHỈ gamerac + 36 MỚI VÀO ĐƯỢC) ====================
-class LoginForm(tk.Frame):
-    def __init__(self, parent, controller):
-        super().__init__(parent)
-        self.controller = controller
-        self.configure(bg="#f0f4f8")
-
-        # Logo CMC
-        try:
-            from PIL import Image, ImageTk
-            logo_img = Image.open("cmc_logo.png")
-            logo_img = logo_img.resize((220, 140), Image.Resampling.LANCZOS)
-            self.logo = ImageTk.PhotoImage(logo_img)
-            tk.Label(self, image=self.logo, bg="#f0f4f8").pack(pady=(60, 30))
-        except:
-            tk.Label(self, text="CMC UNIVERSITY", font=("Helvetica", 36, "bold"), fg="#007acc", bg="#f0f4f8").pack(pady=(60, 10))
-            tk.Label(self, text="Aspire to Inspire the Digital World", font=("Helvetica", 16), fg="#555", bg="#f0f4f8").pack(pady=(0, 40))
-
-
 # ==================== DASHBOARD ====================
-
 class Dashboard(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         self.configure(bg="#f0f4f8")
 
-        # === LOGO / TÊN TRƯỜNG ===
         try:
             from PIL import Image, ImageTk
             logo_img = Image.open("cmc_logo.png")
@@ -170,7 +149,7 @@ class Dashboard(tk.Frame):
                            command=lambda p=page: controller.show_frame(p))
             btn.pack(side="left", padx=20)
 
-            # Hiệu ứng hover (tùy chọn – đẹp hơn)
+
             def hover_enter(e, b=btn): b.config(bg="#005a99")
             def hover_leave(e, b=btn): b.config(bg="#007acc")
             btn.bind("<Enter>", hover_enter)
@@ -499,9 +478,40 @@ class BaoCaoForm(tk.Frame):
         canvas = FigureCanvasTkAgg(fig, self.chart_frame); canvas.draw(); canvas.get_tk_widget().pack(fill="both", expand=True)
 
     def top_bacsi(self):
-        data = rows_to_list(execute_query("SELECT TOP 5 bs.HoTen, COUNT(*) FROM LichKham lk JOIN BacSi bs ON lk.MaBacSi=bs.MaBacSi GROUP BY bs.HoTen ORDER BY COUNT(*) DESC", fetch=True))
-        msg = "\n".join([f"{name}: {sl} ca" for name, sl in data]) if data else "Chưa có dữ liệu"
-        messagebox.showinfo("Top 5 bác sĩ", msg)
+        # Gọi Stored Procedure thay vì câu Select thường
+        query = "{CALL prc_Top5BacSiTieuBieu}"
+
+        # Nếu pyodbc không hỗ trợ CALL trực tiếp tuỳ driver, dùng EXEC:
+        # query = "EXEC prc_Top5BacSiTieuBieu"
+
+        try:
+            data = rows_to_list(execute_query(query, fetch=True))
+
+            if data:
+                # Format hiển thị: Nguyễn Văn A (Khoa Nhi): 15 ca
+                msg_list = [f"{i + 1}. {row[0]} ({row[1]}): {row[2]} ca" for i, row in enumerate(data)]
+                msg = "\n".join(msg_list)
+                messagebox.showinfo("Top 5 Bác sĩ tiêu biểu (Đã khám)", msg)
+            else:
+                messagebox.showinfo("Thông báo", "Chưa có dữ liệu bác sĩ nào hoàn thành ca khám.")
+
+        except Exception as e:
+            # Fallback nếu chưa tạo Procedure thì chạy câu lệnh thường
+            data = rows_to_list(execute_query("""
+                                              SELECT TOP 5 bs.HoTen, bs.ChuyenKhoa, COUNT(*)
+                                              FROM LichKham lk
+                                                       JOIN BacSi bs ON lk.MaBacSi = bs.MaBacSi
+                                              WHERE lk.TrangThai = N'Đã khám'
+                                              GROUP BY bs.HoTen, bs.ChuyenKhoa
+                                              ORDER BY COUNT(*) DESC
+                                              """, fetch=True))
+
+            if data:
+                msg_list = [f"{i + 1}. {row[0]} ({row[1]}): {row[2]} ca" for i, row in enumerate(data)]
+                msg = "\n".join(msg_list)
+                messagebox.showinfo("Top 5 Bác sĩ (Fallback)", msg)
+            else:
+                messagebox.showinfo("Thông báo", "Chưa có dữ liệu.")
 
 
 # ==================== CHẠY CHƯƠNG TRÌNH ====================
