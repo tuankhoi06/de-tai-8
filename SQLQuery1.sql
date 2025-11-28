@@ -158,6 +158,8 @@ GO
 CREATE OR ALTER PROCEDURE prc_TimKiemLichKham (@MaBenhNhan INT)
 AS
 BEGIN
+
+	
 	-- Lệnh SELECT truy vấn chi tiết lịch khám
 	SELECT
     	l.MaLichKham,
@@ -179,6 +181,28 @@ BEGIN
 END;
 GO
 
+-- ***** Object:  StoredProcedure
+	CREATE OR ALTER PROCEDURE prc_Top5BacSiTieuBieu
+AS
+BEGIN
+    SELECT TOP 5 
+        bs.HoTen,
+        bs.ChuyenKhoa,
+        COUNT(lk.MaLichKham) AS SoLuongCaKham
+    FROM 
+        BACSI bs
+    JOIN 
+        LICHKHAM lk ON bs.MaBacSi = lk.MaBacSi
+    WHERE 
+        lk.TrangThai = N'Đã khám' -- Chỉ tính những ca đã hoàn thành
+    GROUP BY 
+        bs.HoTen, bs.ChuyenKhoa
+    ORDER BY 
+        SoLuongCaKham DESC;
+END;
+GO
+
+	
 /*triger one */
 CREATE TRIGGER trg_ngay_capnhat_ngaykham
  ON LICHKHAM
@@ -224,16 +248,36 @@ ON BENHNHAN
 AFTER UPDATE
 AS
 BEGIN
-    IF EXISTS (SELECT * FROM inserted WHERE TrangThaiBenhNhan = 'Đã khỏi bệnh')
+    
+    IF EXISTS (SELECT * FROM inserted WHERE TrangThaiBenhNhan = N'Đã khỏi bệnh')
     BEGIN
-        -- Thêm lịch khám mới khi bệnh nhân khỏi bệnh
-        INSERT INTO LICHKHAM (MaBenhNhan, MaBacSi, MaPhong, NgayGioKham, TrangThai)
-        VALUES 
-        ((SELECT MaBenhNhan FROM inserted),  -- MaBenhNhan từ bảng inserted
-         (SELECT MaBacSi FROM LICHKHAM WHERE MaBenhNhan = (SELECT MaBenhNhan FROM inserted)), -- Lấy MaBacSi từ LICHKHAM
-         'MaPhong',  -- Bạn cần thay thế 'MaPhong' bằng giá trị thực tế
-         DATEADD(MONTH, 6, SYSDATETIME()), 'Chưa khám');  -- Ngày tái khám
+        DECLARE @MaBenhNhan INT;
+        DECLARE @MaBacSi INT;
+        
+        SELECT @MaBenhNhan = MaBenhNhan FROM inserted;
+
+        -- Lấy Bác sĩ từ lần khám GẦN NHẤT của bệnh nhân này
+        SELECT TOP 1 @MaBacSi = MaBacSi 
+        FROM LICHKHAM 
+        WHERE MaBenhNhan = @MaBenhNhan 
+        ORDER BY NgayGioKham DESC;
+
+        -- Nếu tìm thấy bác sĩ cũ thì mới tạo lịch tái khám
+        IF @MaBacSi IS NOT NULL
+        BEGIN
+            INSERT INTO LICHKHAM (MaBenhNhan, MaBacSi, MaPhong, NgayGioKham, TrangThai)
+            VALUES 
+            (
+                @MaBenhNhan, 
+                @MaBacSi, 
+                1, 
+                DATEADD(MONTH, 6, GETDATE()), 
+                N'Chưa khám' 
+            ); 
+        END
     END
 END;
+GO
+
 
 
