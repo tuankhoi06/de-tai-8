@@ -77,7 +77,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[v_chitietlichkham] AS
+CREATE VIEW v_chitietdoituonglichkham AS
 SELECT 
    l.MaLichKham,
     b.HoTen AS TenBenhNhan,
@@ -94,12 +94,12 @@ JOIN
 JOIN 
    PHONGKHAM pk ON l.MaPhong = pk.MaPhong;
 GO
-/****** Object:  View [dbo].[v_chitietbacsi]    Script Date: 11/7/2025 10:10:10 PM ******/
+/****** Object:  View     Script Date: 11/7/2025 10:10:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[v_chitietbacsi] AS
+CREATE VIEW V_ChiTietDoiTuongBacsi AS
 SELECT 
    bs.MaBacSi,
     bs.HoTen,
@@ -110,12 +110,13 @@ SELECT
 FROM 
    BACSI bs;
 GO
-/****** Object:  View [dbo].[v_phongkham]    Script Date: 11/7/2025 10:10:10 PM ******/
+
+/****** Object:  View     Script Date: 11/7/2025 10:10:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[v_phongkham] AS
+CREATE VIEW V_ThongTinPhongKham AS
 SELECT 
    pk.MaPhong,
     pk.TenPhong,
@@ -124,12 +125,12 @@ SELECT
 FROM 
    PHONGKHAM pk;
 GO
-/****** Object:  View [dbo].[v_benhnhan_status]    Script Date: 11/7/2025 10:10:10 PM ******/
+/****** Object:  View     Script Date: 11/7/2025 10:10:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[v_benhnhan_status] AS
+CREATE VIEW TrangThaiBenhNhan AS
 SELECT 
    b.MaBenhNhan,
     b.HoTen,
@@ -148,90 +149,91 @@ GO
 ALTER TABLE [dbo].[LICHKHAM]  WITH CHECK ADD FOREIGN KEY([MaPhong])
 REFERENCES [dbo].[PHONGKHAM] ([MaPhong])
 GO
-/****** Object:  StoredProcedure [dbo].[prc_TimKiemLichKham]    Script Date: 11/7/2025 10:10:10 PM ******/
+	
+/****** Object:  StoredProcedure     Script Date: 11/7/2025 10:10:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[prc_TimKiemLichKham] (@MaBenhNhan INT)
+CREATE OR ALTER PROCEDURE prc_TimKiemLichKham (@MaBenhNhan INT)
 AS
 BEGIN
-    SELECT 
-       l.MaLichKham,
-        b.HoTen AS TenBenhNhan,
-        bs.HoTen AS TenBacSi,
-        pk.TenPhong AS TenPhongKham,
-        l.NgayGioKham,
-        l.TrangThai
-    FROM 
-       LICHKHAM l
-    JOIN 
-       BENHNHAN b ON l.MaBenhNhan = b.MaBenhNhan
-    JOIN 
-       BACSI bs ON l.MaBacSi = bs.MaBacSi
-    JOIN 
-       PHONGKHAM pk ON l.MaPhong = pk.MaPhong
-    WHERE 
-       l.MaBenhNhan = @MaBenhNhan;
+	-- Lệnh SELECT truy vấn chi tiết lịch khám
+	SELECT
+    	l.MaLichKham,
+    	b.HoTen AS TenBenhNhan,
+    	bs.HoTen AS TenBacSi,
+    	pk.TenPhong AS TenPhongKham,
+    	l.NgayGioKham,
+    	l.TrangThai
+	FROM
+    	LICHKHAM l
+	JOIN
+    	BENHNHAN b ON l.MaBenhNhan = b.MaBenhNhan
+	JOIN
+    	BACSI bs ON l.MaBacSi = bs.MaBacSi
+	JOIN
+    	PHONGKHAM pk ON l.MaPhong = pk.MaPhong
+	WHERE
+    	l.MaBenhNhan = @MaBenhNhan; -- Lọc theo Mã Bệnh nhân được truyền vào
 END;
 GO
 
-SELECT * FROM v_chitietlichkham;
-
 /*triger one */
-CREATE TRIGGER trg_UpdateTrangThaiBenhNhan
+CREATE TRIGGER trg_ngay_capnhat_ngaykham
+ ON LICHKHAM
+ AFTER INSERT
+ AS
+ BEGIN
+ 	UPDATE LICHKHAM
+ 	SET NgayGioKham = SYSDATETIME()
+ 	WHERE MaLichKham = (SELECT MaLichKham FROM inserted);
+ END;
+
+/*triger two*/ 
+CREATE TRIGGER trg_UpdatePhongKhamStatus
+ ON LICHKHAM
+ AFTER INSERT
+ AS
+ BEGIN
+ 	IF EXISTS (SELECT * FROM inserted)
+ 	BEGIN
+     	UPDATE PHONGKHAM
+     	SET TinhTrang = 'Đã có bệnh nhân'
+     	WHERE MaPhong IN (SELECT MaPhong FROM inserted);
+ 	END
+ END;
+
+/*triger three*/
+CREATE TRIGGER trg_UpdatePhongKhamStatus_Delete
+ ON LICHKHAM
+ AFTER DELETE
+ AS
+ BEGIN
+ 	IF EXISTS (SELECT * FROM deleted)
+ 	BEGIN
+     	UPDATE PHONGKHAM
+     	SET TinhTrang = 'Còn trống'
+     	WHERE MaPhong IN (SELECT MaPhong FROM deleted);
+ 	END
+ END;
+
+/* */
+CREATE TRIGGER trg_CreateTaoLichTaiKham
 ON BENHNHAN
 AFTER UPDATE
 AS
 BEGIN
     IF EXISTS (SELECT * FROM inserted WHERE TrangThaiBenhNhan = 'Đã khỏi bệnh')
     BEGIN
-        -- Cập nhật trạng thái bệnh nhân khi thay đổi sang "Đã khỏi bệnh"
-        UPDATE BENHNHAN
-        SET TrangThaiBenhNhan = 'Đã khỏi bệnh'
-        WHERE MaBenhNhan IN (SELECT MaBenhNhan FROM inserted);
+        -- Thêm lịch khám mới khi bệnh nhân khỏi bệnh
+        INSERT INTO LICHKHAM (MaBenhNhan, MaBacSi, MaPhong, NgayGioKham, TrangThai)
+        VALUES 
+        ((SELECT MaBenhNhan FROM inserted),  -- MaBenhNhan từ bảng inserted
+         (SELECT MaBacSi FROM LICHKHAM WHERE MaBenhNhan = (SELECT MaBenhNhan FROM inserted)), -- Lấy MaBacSi từ LICHKHAM
+         'MaPhong',  -- Bạn cần thay thế 'MaPhong' bằng giá trị thực tế
+         DATEADD(MONTH, 6, SYSDATETIME()), 'Chưa khám');  -- Ngày tái khám
     END
 END;
-/*triger two*/ 
-CREATE TRIGGER trg_UpdatePhongKhamStatus
-ON LICHKHAM
-AFTER INSERT
-AS
-BEGIN
-    IF EXISTS (SELECT * FROM inserted)
-    BEGIN
-        -- Cập nhật trạng thái phòng khám khi có bệnh nhân
-        UPDATE PHONGKHAM
-        SET TinhTrang = 'Đã có bệnh nhân'
-        WHERE MaPhong IN (SELECT MaPhong FROM inserted);
-    END
-END;
-/*triger three*/
-CREATE TRIGGER trg_UpdatePhongKhamStatusAfterPayment
-ON LICHKHAM
-AFTER UPDATE
-AS
-BEGIN
-    IF EXISTS (SELECT * FROM inserted WHERE TrangThai = 'Đã thanh toán')
-    BEGIN
-        -- Cập nhật lại trạng thái phòng sau khi thanh toán
-        UPDATE PHONGKHAM
-        SET TinhTrang = 'Còn trống'
-        WHERE MaPhong IN (SELECT MaPhong FROM inserted);
-    END
-END;
-/* */
-CREATE TRIGGER trg_UpdateLichKhamInfo
-ON LICHKHAM
-AFTER UPDATE
-AS
-BEGIN
-    IF EXISTS (SELECT * FROM inserted)
-    BEGIN
-        -- Cập nhật lại các thông tin lịch khám nếu có sự thay đổi
-        UPDATE LICHKHAM
-        SET NgayGioKham = (SELECT NgayGioKham FROM inserted)
-        WHERE MaLichKham IN (SELECT MaLichKham FROM inserted);
-    END
-END;
- 
+
+
