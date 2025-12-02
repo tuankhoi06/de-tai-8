@@ -366,10 +366,3 @@ GROUP BY
     bs.MaBacSi, bs.HoTen 
 ORDER BY 
     SoLuongBenhNhan DESC;
-
-
-
-
-
-
-
