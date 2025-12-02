@@ -223,7 +223,7 @@ CREATE TRIGGER trg_UpdatePhongKhamStatus
  	IF EXISTS (SELECT * FROM inserted)
  	BEGIN
      	UPDATE PHONGKHAM
-     	SET TinhTrang = 'Đã có bệnh nhân'
+     	SET TinhTrang = N'Đã có bệnh nhân'
      	WHERE MaPhong IN (SELECT MaPhong FROM inserted);
  	END
  END;
@@ -237,7 +237,7 @@ CREATE TRIGGER trg_UpdatePhongKhamStatus_Delete
  	IF EXISTS (SELECT * FROM deleted)
  	BEGIN
      	UPDATE PHONGKHAM
-     	SET TinhTrang = 'Còn trống'
+     	SET TinhTrang = N'Còn trống'
      	WHERE MaPhong IN (SELECT MaPhong FROM deleted);
  	END
  END;
@@ -366,3 +366,65 @@ GROUP BY
     bs.MaBacSi, bs.HoTen 
 ORDER BY 
     SoLuongBenhNhan DESC;
+
+-- 1 số cập nhập dữ liệu
+-- Câu 9: Cập nhật số điện thoại mới cho bệnh nhân có Mã số 1
+UPDATE BENHNHAN
+SET SoDienThoai = '0999888777'
+WHERE MaBenhNhan = 1;
+
+-- Câu 10: Cập nhật chuyên khoa cho bác sĩ có Mã số 2 (Ví dụ chuyển sang khoa 'Nội thần kinh')
+UPDATE BACSI
+SET ChuyenKhoa = N'Nội thần kinh'
+WHERE MaBacSi = 2;
+
+-- Câu 11: Xóa một lịch khám đã bị hủy (Ví dụ lịch số 10)
+DELETE FROM LICHKHAM
+WHERE MaLichKham = 10 AND TrangThai = N'Đã hủy';
+
+-- chạy view 
+SELECT * FROM v_chitietdoituonglichkham;
+
+SELECT * FROM V_ChiTietDoiTuongBacsi;
+
+SELECT * FROM V_ThongTinPhongKham;
+
+SELECT * FROM TrangThaiBenhNhan;
+
+-- Procedure
+EXEC prc_TimKiemLichKham @MaBenhNhan = 1;
+
+EXEC prc_Top5BacSiTieuBieu;
+
+-- trigger 1: cập nhập lịch khám
+SELECT MaPhong, TenPhong, TinhTrang FROM PHONGKHAM WHERE MaPhong = 1;
+--// thêm lịch
+INSERT INTO LICHKHAM (MaLichKham, MaBenhNhan, MaBacSi, MaPhong, NgayGioKham, TrangThai)
+VALUES (100, 1, 1, 1, GETDATE(), N'Chưa khám'); 
+
+-- trigger 2: tự động tạo lịch tái khám
+SELECT * FROM LICHKHAM WHERE MaBenhNhan = 2;
+--// cập UPDATE BENHNHAN 
+SET TrangThaiBenhNhan = N'Đã khỏi bệnh' 
+WHERE MaBenhNhan = 2;
+
+-- trigger 3: tự động cập nhật trạng thái phòng khám khi có bệnh nhân đến khám
+INSERT INTO LICHKHAM (MaLichKham, MaBenhNhan, MaBacSi, MaPhong, NgayGioKham, TrangThai)
+VALUES (999, 1, 1, 1, '2000-01-01 00:00:00', N'Chưa khám');
+--// Kiểm tra lại dữ liệu ngay lập tức
+SELECT MaLichKham, NgayGioKham 
+FROM LICHKHAM 
+WHERE MaLichKham = 999;
+
+-- trigger 4: tự động cập nhật tình trạng phòng khám khi hủy lịch khám
+UPDATE PHONGKHAM SET TinhTrang = N'Đã có bệnh nhân' WHERE MaPhong = 2;
+INSERT INTO LICHKHAM (MaLichKham, MaBenhNhan, MaBacSi, MaPhong, NgayGioKham, TrangThai)
+VALUES (888, 2, 2, 2, GETDATE(), N'Đang khám');
+
+SELECT MaPhong, TenPhong, TinhTrang FROM PHONGKHAM WHERE MaPhong = 2;
+
+DELETE FROM LICHKHAM WHERE MaLichKham = 888;
+
+SELECT MaPhong, TenPhong, TinhTrang FROM PHONGKHAM WHERE MaPhong = 2;
+
+
