@@ -280,4 +280,96 @@ END;
 GO
 
 
+-- Thực nghiệm 8 câu 
+-- Câu 1:
+1. Danh sách bệnh nhân theo từng bác sĩ
+	
+SELECT bs.HoTen AS BacSi, bn.HoTen AS BenhNhan
+FROM BacSi bs
+JOIN LichKham lk ON bs.MaBacSi = lk.MaBacSi
+JOIN BenhNhan bn ON lk.MaBenhNhan = bn.MaBenhNhan
+ORDER BY bs.HoTen, bn.HoTen;
+
+-- Câu 2:
+2. Danh sách lịch khám bệnh của bác sĩ theo ngày
+	
+SELECT bs.HoTen AS BacSi, bn.HoTen AS BenhNhan, lk.NgayGioKham, lk.TrangThai
+FROM LichKham lk
+JOIN BacSi bs ON lk.MaBacSi = bs.MaBacSi
+JOIN BenhNhan bn ON lk.MaBenhNhan = bn.MaBenhNhan
+WHERE CAST(lk.NgayGioKham AS DATE) = '2025-11-10'
+ORDER BY lk.NgayGioKham;
+
+-- Câu 3: 
+3. Thống kê số lượng bệnh nhân khám bệnh theo ngày/tháng
+	
+SELECT CAST(NgayGioKham AS DATE) AS Ngay, COUNT(DISTINCT MaBenhNhan) AS SoLuongBenhNhan
+FROM LichKham
+GROUP BY CAST(NgayGioKham AS DATE)
+ORDER BY Ngay DESC;
+
+-- Câu 4:
+
+4. Tìm kiếm bệnh nhân đã khám bệnh trong tháng/năm
+	
+SELECT bn.HoTen, lk.NgayGioKham, lk.TrangThai
+FROM LichKham lk
+JOIN BenhNhan bn ON lk.MaBenhNhan = bn.MaBenhNhan
+WHERE MONTH(lk.NgayGioKham) = 11 AND YEAR(lk.NgayGioKham) = 2025
+AND lk.TrangThai = N'Đã khám';
+
+-- Câu 5:
+5. Báo cáo danh sách bệnh nhân điều trị nội trú.
+	
+SELECT bn.HoTen, bn.TrangThaiBenhNhan
+FROM BenhNhan bn
+WHERE bn.TrangThaiBenhNhan = N'Đang điều trị';
+
+-- Câu 6:
+6. Quản lý lịch trực của bác sĩ theo chuyên khoa
+	
+SELECT 
+    bs.HoTen AS TenBacSi,
+    lk.NgayGioKham,      
+    pk.TenPhong AS TenPhongKham
+FROM 
+    BACSI bs
+JOIN 
+    LICHKHAM lk ON bs.MaBacSi = lk.MaBacSi 
+JOIN
+    PHONGKHAM pk ON lk.MaPhong = pk.MaPhong 
+WHERE 
+    bs.ChuyenKhoa = N'Nhĩ khoa' 
+ORDER BY 
+    lk.NgayGioKham; 
+
+-- Câu 7:
+7. Tính tổng số lần khám bệnh của từng bác sĩ.
+	
+SELECT bs.HoTen, COUNT(lk.MaLichKham) AS SoLuongKham
+FROM LichKham lk
+JOIN BacSi bs ON lk.MaBacSi = bs.MaBacSi
+GROUP BY bs.HoTen
+ORDER BY SoLuongKham DESC;
+
+-- Câu 8:
+8. Danh sách bác sĩ có nhiều bệnh nhân nhất
+
+SELECT TOP 1 WITH TIES 
+    bs.HoTen, 
+    COUNT(lk.MaLichKham) AS SoLuongBenhNhan
+FROM 
+    BACSI bs
+JOIN 
+    LICHKHAM lk ON bs.MaBacSi = lk.MaBacSi
+GROUP BY 
+    bs.MaBacSi, bs.HoTen 
+ORDER BY 
+    SoLuongBenhNhan DESC;
+
+
+
+
+
+
 
