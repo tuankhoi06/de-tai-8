@@ -1,10 +1,7 @@
 ﻿USE [Quanlybenhvien]
 GO
 /****** Object:  Table [dbo].[BENHNHAN]    Script Date: 11/7/2025 10:10:10 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+
 CREATE TABLE [dbo].[BENHNHAN](
 	[MaBenhNhan] [int] NOT NULL,
 	[HoTen] [nvarchar](255) NULL,
@@ -20,10 +17,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 /****** Object:  Table [dbo].[BACSI]    Script Date: 11/7/2025 10:10:10 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+
 CREATE TABLE [dbo].[BACSI](
 	[MaBacSi] [int] NOT NULL,
 	[HoTen] [nvarchar](255) NULL,
@@ -38,10 +32,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 /****** Object:  Table [dbo].[PHONGKHAM]    Script Date: 11/7/2025 10:10:10 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+
 CREATE TABLE [dbo].[PHONGKHAM](
 	[MaPhong] [int] NOT NULL,
 	[TenPhong] [nvarchar](255) NULL,
@@ -54,10 +45,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 /****** Object:  Table [dbo].[LICHKHAM]    Script Date: 11/7/2025 10:10:10 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+
 CREATE TABLE [dbo].[LICHKHAM](
 	[MaLichKham] [int] NOT NULL,
 	[MaBenhNhan] [int] NULL,
@@ -182,6 +170,10 @@ END;
 GO
 
 -- ***** Object:  StoredProcedure
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 	CREATE OR ALTER PROCEDURE prc_Top5BacSiTieuBieu
 AS
 BEGIN
@@ -204,6 +196,10 @@ GO
 
 	
 /*triger one */
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TRIGGER trg_ngay_capnhat_ngaykham
  ON LICHKHAM
  AFTER INSERT
@@ -215,6 +211,10 @@ CREATE TRIGGER trg_ngay_capnhat_ngaykham
  END;
 
 /*triger two*/ 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TRIGGER trg_UpdatePhongKhamStatus
  ON LICHKHAM
  AFTER INSERT
@@ -229,6 +229,10 @@ CREATE TRIGGER trg_UpdatePhongKhamStatus
  END;
 
 /*triger three*/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TRIGGER trg_UpdatePhongKhamStatus_Delete
  ON LICHKHAM
  AFTER DELETE
@@ -243,6 +247,10 @@ CREATE TRIGGER trg_UpdatePhongKhamStatus_Delete
  END;
 
 /* */
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TRIGGER trg_CreateTaoLichTaiKham
 ON BENHNHAN
 AFTER UPDATE
@@ -426,5 +434,6 @@ SELECT MaPhong, TenPhong, TinhTrang FROM PHONGKHAM WHERE MaPhong = 2;
 DELETE FROM LICHKHAM WHERE MaLichKham = 888;
 
 SELECT MaPhong, TenPhong, TinhTrang FROM PHONGKHAM WHERE MaPhong = 2;
+
 
 
